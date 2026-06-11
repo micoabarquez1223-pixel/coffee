@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Have a Coffee</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #fff1d6, #c9905c 45%, #3b1f12);
+  font-family: Georgia, serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  color: #fff7e8;
+}
+
+.card {
+  width: 92%;
+  max-width: 430px;
+  min-height: 620px;
+  padding: 30px 22px;
+  border-radius: 30px;
+  background: rgba(45, 22, 10, 0.45);
+  border: 1px solid rgba(255, 235, 200, 0.35);
+  box-shadow: 0 25px 70px rgba(0,0,0,0.35);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+h1 {
+  font-size: 34px;
+  margin: 0 0 10px;
+}
+
+.subtitle {
+  font-size: 16px;
+  opacity: 0.9;
+  margin-bottom: 25px;
+}
+
+.coffee-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 25px 0;
+}
+
+.coffee-gif {
+  width: 260px;
+  max-width: 85vw;
+  border-radius: 22px;
+  cursor: pointer;
+  transition: 0.3s;
+  filter: drop-shadow(0 18px 25px rgba(0,0,0,0.35));
+}
+
+.coffee-gif:hover {
+  transform: scale(1.05);
+}
+
+.coffee-gif.shake {
+  animation: quake 0.18s infinite;
+}
+
+@keyframes quake {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(6px, -3px) rotate(1deg); }
+  50% { transform: translate(-6px, 3px) rotate(-1deg); }
+  75% { transform: translate(5px, 2px) rotate(1deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+.screen-shake {
+  animation: screenShake 0.18s infinite;
+}
+
+@keyframes screenShake {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(3px, -2px); }
+  50% { transform: translate(-3px, 2px); }
+  75% { transform: translate(2px, 1px); }
+  100% { transform: translate(0, 0); }
+}
+
+.hint {
+  font-size: 15px;
+  opacity: 0.85;
+}
+
+.alert {
+  display: none;
+  margin: 18px 0 12px;
+  font-size: 21px;
+  font-weight: bold;
+  color: #ffe0a3;
+  text-shadow: 0 0 15px rgba(255, 210, 120, 0.8);
+  animation: blink 0.7s infinite;
+}
+
+.alert.show {
+  display: block;
+}
+
+@keyframes blink {
+  50% { opacity: 0.35; }
+}
+
+.loading {
+  display: none;
+  margin: 14px auto 18px;
+  width: 85%;
+  max-width: 300px;
+}
+
+.loading.show {
+  display: block;
+}
+
+.loading-text {
+  font-size: 14px;
+  margin-bottom: 8px;
+  opacity: 0.9;
+}
+
+.bar {
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.18);
+  overflow: hidden;
+}
+
+.fill {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(135deg, #ffd18a, #ff8f5a);
+  border-radius: 999px;
+}
+
+.fill.start {
+  animation: fillBar 2s forwards;
+}
+
+@keyframes fillBar {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+button {
+  display: none;
+  border: none;
+  padding: 14px 30px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ffd18a, #ff8f5a);
+  color: #3b1f12;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+  transition: 0.25s;
+}
+
+button.show {
+  display: inline-block;
+  animation: pop 0.5s ease forwards;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+/* CENTER POPUP RESULT */
+.result {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 22px;
+  background: rgba(0,0,0,0.58);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  visibility: hidden;
+  transition: 0.6s ease;
+  z-index: 999;
+}
+
+.result.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* LANDSCAPE PHOTO FIX */
+.photo-container {
+  position: relative;
+  width: min(92vw, 390px);
+  height: 285px;
+  border-radius: 26px;
+  overflow: hidden;
+  border: 3px solid rgba(255, 221, 160, 0.8);
+  box-shadow: 0 25px 70px rgba(0,0,0,0.55);
+  background: #160805;
+  transform: scale(0.7) translateY(30px);
+  transition: 0.7s ease;
+}
+
+.result.show .photo-container {
+  transform: scale(1) translateY(0);
+}
+
+.crush-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: #160805;
+}
+
+/* TEXT OVERLAY ON PHOTO */
+.overlay-card {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 80px 16px 18px;
+  background: linear-gradient(
+    to top,
+    rgba(38, 20, 11, 0.98),
+    rgba(38, 20, 11, 0.78),
+    rgba(38, 20, 11, 0)
+  );
+  color: #fff7e8;
+  transform: translateY(100%);
+  transition: 0.9s ease;
+  text-align: center;
+}
+
+.overlay-card.show {
+  transform: translateY(0);
+}
+
+.overlay-card h2 {
+  margin: 0 0 6px;
+  font-size: 23px;
+  line-height: 1.05;
+}
+
+.overlay-card p {
+  margin: 4px 0;
+  font-size: 14.5px;
+  line-height: 1.25;
+}
+
+.highlight {
+  color: #ffd18a;
+  font-weight: bold;
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.75);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    min-height: 590px;
+  }
+
+  h1 {
+    font-size: 29px;
+  }
+
+  .coffee-gif {
+    width: 230px;
+  }
+
+  .photo-container {
+    width: 92vw;
+    height: 270px;
+  }
+
+  .overlay-card {
+    padding: 75px 14px 16px;
+  }
+
+  .overlay-card h2 {
+    font-size: 21px;
+  }
+
+  .overlay-card p {
+    font-size: 13.5px;
+  }
+}
+</style>
+</head>
+
+<body>
+    <audio id="quakeSound" src="earthquake.mp3"></audio>
+    <audio id="revealSound" src="reveal.mp3"></audio>
+
+<div class="card" id="card">
+  <h1>Morning Coffee</h1>
+  <p class="subtitle" id="subtitle">Just a peaceful cup of coffee.</p>
+
+  <div class="coffee-container">
+    <img
+      src="cupp.gif"
+      id="coffeeGif"
+      class="coffee-gif"
+      onclick="startEarthquake()"
+      alt="Coffee"
+    />
+  </div>
+
+  <p class="hint" id="hint">Tap the coffee ☕</p>
+
+  <div class="alert" id="alert">⚠ EARTHQUAKE DETECTED ⚠</div>
+
+  <div class="loading" id="loading">
+    <div class="loading-text">Analyzing source...</div>
+    <div class="bar">
+      <div class="fill" id="fill"></div>
+    </div>
+  </div>
+
+  <button id="investigateBtn" onclick="investigate()">Investigate</button>
+</div>
+
+<div class="result" id="result">
+  <div class="photo-container">
+    <img src="crush.jpg" alt="Photo" class="crush-photo" />
+
+    <div class="overlay-card" id="overlayCard">
+      <h2>Investigation Complete</h2>
+      <p>The coffee wasn't shaking.</p>
+      <p>I was.</p> <span class="highlight">Turns out your notification still has that effect.</span></p>
+    </div>
+  </div>
+</div>
+
+<script>
+let alreadyStarted = false;
+
+function startEarthquake() {
+
+  if (alreadyStarted) return;
+  alreadyStarted = true;
+
+  const quakeSound = document.getElementById("quakeSound");
+  quakeSound.currentTime = 0;
+  quakeSound.play();
+
+  const coffee = document.getElementById("coffeeGif");
+  const card = document.getElementById("card");
+  const alertBox = document.getElementById("alert");
+  const loading = document.getElementById("loading");
+  const fill = document.getElementById("fill");
+  const btn = document.getElementById("investigateBtn");
+  const hint = document.getElementById("hint");
+  const subtitle = document.getElementById("subtitle");
+
+  coffee.classList.add("shake");
+  card.classList.add("screen-shake");
+
+  hint.innerText = "Wait... why is it shaking?";
+  subtitle.innerText = "Something is not normal anymore.";
+
+  setTimeout(() => {
+    alertBox.classList.add("show");
+  }, 400);
+
+  setTimeout(() => {
+    loading.classList.add("show");
+    fill.classList.add("start");
+  }, 900);
+
+  setTimeout(() => {
+    btn.classList.add("show");
+  }, 3000);
+}
+
+function investigate() {
+
+  const quakeSound = document.getElementById("quakeSound");
+  const revealSound = document.getElementById("revealSound");
+
+  quakeSound.pause();
+  quakeSound.currentTime = 0;
+
+  revealSound.currentTime = 0;
+  revealSound.play();
+
+  const result = document.getElementById("result");
+  const overlayCard = document.getElementById("overlayCard");
+  const card = document.getElementById("card");
+  const coffee = document.getElementById("coffeeGif");
+  const btn = document.getElementById("investigateBtn");
+
+  card.classList.remove("screen-shake");
+  coffee.classList.remove("shake");
+  btn.style.display = "none";
+
+  result.classList.add("show");
+
+  setTimeout(() => {
+    overlayCard.classList.add("show");
+  }, 600);
+}
+</script>
+
+</body>
+</html>
